@@ -88,4 +88,15 @@ Implementace je v `app/src/main/java/utb/fai/`:
 java -jar app/build/libs/app-all.jar <URL> [maxDepth=2] [debugLevel=0]
 ```
 
+### Automatické testy
+
+[![Java CI](https://github.com/OSKKYSV2/WEBCRAWLER/actions/workflows/github-ci.yml/badge.svg)](https://github.com/OSKKYSV2/WEBCRAWLER/actions/workflows/github-ci.yml)
+
+```
+./gradlew test
+```
+
+* **JUnit testy** (`app/src/test/java/utb/fai/`) běží proti lokálnímu HTTP serveru, takže nepotřebují internet: počítání jen viditelného textu, hloubka zanoření, každá stránka jen jednou (cykly, fragmenty, přesměrování), kódování z HTTP hlavičky i z `<meta>`, paralelní stahování, časový limit, rozbité odkazy a formát výstupu `slovo;počet`.
+* **GitHub Actions** při každém pushi spustí JUnit testy, sestaví `app-all.jar` a udělá smoke test na stejných stránkách jako školní testy (hloubka 0, limit 13 s, max. 20 řádků `slovo;počet` seřazených sestupně).
+
 Příklad: `java -jar app/build/libs/app-all.jar https://www.utb.cz/en/ 0`

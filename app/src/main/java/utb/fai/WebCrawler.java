@@ -48,6 +48,7 @@ public class WebCrawler {
 
     private final int maxDepth;
     private final int debugLevel;
+    private final long timeLimitMs;
 
     /** Množina navštívených (naplánovaných) URI - klíč je normalizované URI. */
     private final ConcurrentHashMap<String, Boolean> visitedURIs = new ConcurrentHashMap<>();
@@ -63,8 +64,13 @@ public class WebCrawler {
     private final AtomicInteger failedPages = new AtomicInteger();
 
     public WebCrawler(int maxDepth, int debugLevel) {
+        this(maxDepth, debugLevel, TIME_LIMIT_MS);
+    }
+
+    WebCrawler(int maxDepth, int debugLevel, long timeLimitMs) {
         this.maxDepth = maxDepth;
         this.debugLevel = debugLevel;
+        this.timeLimitMs = timeLimitMs;
         int threads = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
         // vlákna jsou daemon, aby případné zaseknuté spojení nebránilo ukončení JVM
         this.executor = Executors.newFixedThreadPool(threads, runnable -> {
@@ -81,13 +87,13 @@ public class WebCrawler {
         long start = System.currentTimeMillis();
         schedule(new URIinfo(startURI, 0));
 
-        boolean completed = finished.await(TIME_LIMIT_MS, TimeUnit.MILLISECONDS);
+        boolean completed = finished.await(timeLimitMs, TimeUnit.MILLISECONDS);
         stopped.set(true);
         executor.shutdownNow();
         executor.awaitTermination(500, TimeUnit.MILLISECONDS);
 
         if (!completed)
-            System.err.println("Time limit " + TIME_LIMIT_MS / 1000 + " s reached, stopping the crawl.");
+            System.err.printf("Time limit %.1f s reached, stopping the crawl.%n", timeLimitMs / 1000.0);
         if (debugLevel > 0 || !completed)
             System.err.printf("Analyzed %d page(s), %d failed, %d URI(s) found, %.1f s%n",
                     analyzedPages.get(), failedPages.get(), visitedURIs.size(),

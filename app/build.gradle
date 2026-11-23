@@ -17,8 +17,10 @@ repositories {
 }
 
 dependencies {
-    // Use JUnit test framework.
-    // testImplementation libs.junit
+    // Use JUnit Jupiter test framework.
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.junit.jupiter
+    testRuntimeOnly libs.junit.platform.launcher
 
     // This dependency is used by the application.
     implementation libs.guava
@@ -51,5 +53,9 @@ jar {
 }
 
 test {
-    exclude '**/*'
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat = 'full'
+    }
 }

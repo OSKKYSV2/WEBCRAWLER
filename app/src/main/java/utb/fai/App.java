@@ -30,7 +30,13 @@ public class App {
 	public static void main(String[] args) {
 		// výsledek vždy v UTF-8, aby se správně vypsala i slova s diakritikou
 		PrintStream out = new PrintStream(new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8);
+		run(args, out, WebCrawler.TIME_LIMIT_MS);
+	}
 
+	/**
+	 * Spustí analýzu a výslednou tabulku zapíše do {@code out}.
+	 */
+	static void run(String[] args, PrintStream out, long timeLimitMs) {
 		if (args.length < 1 || args[0].isBlank()) {
 			System.err.println("Missing parameter - start URL");
 			System.err.println("Usage: java -jar app-all.jar <URL> [maxDepth=" + DEFAULT_MAX_DEPTH + "] [debugLevel=0]");
@@ -54,7 +60,7 @@ public class App {
 
 		Map<String, Long> wordCounts;
 		try {
-			WebCrawler crawler = new WebCrawler(maxDepth, debugLevel);
+			WebCrawler crawler = new WebCrawler(maxDepth, debugLevel, timeLimitMs);
 			wordCounts = crawler.crawl(startURI);
 		} catch (Exception e) {
 			System.err.println("Unexpected error, printing what we have: " + e);
