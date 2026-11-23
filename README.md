@@ -65,3 +65,27 @@ Spusťte skript s názvem ```run_local_test.sh```.
 Spusťte skript s názvem ```run_local_test.bat```.
 
 
+---
+
+## ✅ Řešení
+
+Implementace je v `app/src/main/java/utb/fai/`:
+
+* `App.java` – zpracování parametrů a výpis 20 nejčastějších slov (`slovo;počet`) na `System.out`.
+* `WebCrawler.java` – vícevláknové procházení webu (vlastní `ExecutorService`, každá stránka = jedna úloha), množina navštívených URI v `ConcurrentHashMap`, parsování HTML přes [JSoup](https://jsoup.org/), počítání slov.
+* `URIinfo.java` – URI + hloubka zanoření.
+
+**Detaily:**
+* Kódování stránky se bere z HTTP hlavičky `Content-Type`, jinak ze značky `<meta charset>` / `<meta http-equiv>`.
+* Počítá se jen viditelný text stránky (bez `<script>`, `<style>` a značek); slova se převádí na malá písmena, slovo = posloupnost písmen včetně diakritiky.
+* Prohledávání má časový limit 10 s, max. 1000 stránek a timeout 5 s na stránku – aplikace vždy skončí a vypíše výsledek.
+* Ladicí výpisy jdou jen na `System.err`, na `System.out` je jen výsledná tabulka.
+
+### Sestavení a spuštění
+
+```
+./gradlew build -x test
+java -jar app/build/libs/app-all.jar <URL> [maxDepth=2] [debugLevel=0]
+```
+
+Příklad: `java -jar app/build/libs/app-all.jar https://www.utb.cz/en/ 0`
